@@ -7,14 +7,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.cglib.proxy.Enhancer;
-import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Comparator;
 
-
-
+/***
+ * Main place where magic happens. BeanPostProcessor  works on the init stages of every bean in spring contest.
+ * this is where we modify the bean, creating proxy through CGLib, adding profiling functionality to methods
+ * This is happening after bean initialization
+ */
 public class ProfilingHandlerBeanPostProcessor implements BeanPostProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(ProfilingHandlerBeanPostProcessor.class);
@@ -35,16 +39,16 @@ public class ProfilingHandlerBeanPostProcessor implements BeanPostProcessor {
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (!enabled) {
-            return bean; // глобально выключено
+            return bean; // if turned off globally, returning same bean.
         }
 
         Class<?> targetClass = bean.getClass();
 
+        //checking whether bean is annotated or not
+        boolean hasAnnotatedMethods = hasAnnotatedMethods(targetClass);
+        if (!targetClass.isAnnotationPresent(Profiling.class) && !hasAnnotatedMethods) return bean;
 
-        boolean hasAnnotedMethods = hasAnnotedMethods(targetClass);
-
-        if (!targetClass.isAnnotationPresent(Profiling.class) && !hasAnnotedMethods) return bean;
-
+        //We can't create CGLib proxy for the final class
         if(Modifier.isFinal(targetClass.getModifiers())) {
             logger.warn("Cannot create proxy for final class: {}" + " Profiling won't work. Consider removing 'final' modifier", beanName);
             return bean;
@@ -55,8 +59,9 @@ public class ProfilingHandlerBeanPostProcessor implements BeanPostProcessor {
     }
 
 
-    private boolean hasAnnotedMethods(Class<?> clazz){
+    private boolean hasAnnotatedMethods(Class<?> clazz){
         Method[] methods = clazz.getDeclaredMethods();
+
         for (Method method : methods) {
             if (method.isAnnotationPresent(Profiling.class)) {
                 return true;
@@ -65,7 +70,7 @@ public class ProfilingHandlerBeanPostProcessor implements BeanPostProcessor {
 
         Class<?> superClass = clazz.getSuperclass();
         if (superClass != null && superClass != Object.class) {
-            return hasAnnotedMethods(superClass);
+            return hasAnnotatedMethods(superClass);
         }
 
         return false;
@@ -75,26 +80,31 @@ public class ProfilingHandlerBeanPostProcessor implements BeanPostProcessor {
     private Object createCGLibProxy(Object target, Class<?> targetClass) {
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(targetClass);
+
+        //Setting method interceptor functionality
         enhancer.setCallback(new ProfilingMethodInterceptor(targetClass, target, defaultLogType));
 
         Object proxy;
 
         try {
-            //Пытаемся использовать дефолтный конструктор
+            //trying to use default constructor
             Constructor<?> defaultConstructor = getDefaultConstructor(targetClass);
             if (defaultConstructor != null) {
                 proxy = enhancer.create();
                 return proxy;
             }
-
             logger.warn("No default constructor found for {}", targetClass);
-            Constructor<?>[] constructors = targetClass.getDeclaredConstructors();
-            if (constructors.length == 0) {
-                logger.warn( "No sutable constructor found for " + targetClass + ". returning original bean");
+
+            Constructor<?> constructor = Arrays.stream(targetClass.getConstructors())
+                    .min(Comparator.comparingInt(Constructor::getParameterCount))
+                    .orElse(null);
+
+            if (constructor ==  null) {
+                logger.warn("No sutable constructor found for {}. returning original bean", targetClass);
                 return target;
             }
 
-            Constructor<?> constructor = constructors[0];
+
             Class<?>[] parameterTypes = constructor.getParameterTypes();
             Object[] parameters = new Object[parameterTypes.length];
             proxy = enhancer.create(parameterTypes, parameters);

@@ -10,7 +10,7 @@
       "name": "profiling.log-type",
       "type": "org.profiling.enums.LogType",
       "defaultValue": "SIMPLE",
-      "description": "Default log output format."
+      "description": "Log output format. SIMPLE - simple formatting. PRETTIER - formatted log output with concat, tabs, beautiful output"
     }
   ]
 }
