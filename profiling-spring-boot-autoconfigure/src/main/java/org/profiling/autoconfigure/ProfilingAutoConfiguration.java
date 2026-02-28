@@ -15,7 +15,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Role;
 
-/**
+/***
  * Auto-configuration that wires profiling either through Spring AOP infrastructure (default)
  * or the legacy enhancer-based bean post processor for compatibility.
  */
@@ -25,6 +25,11 @@ import org.springframework.context.annotation.Role;
 @ConditionalOnProperty(prefix = "profiling", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class ProfilingAutoConfiguration {
 
+    /***
+     * Registers infrastructure auto-proxy creator used to apply profiling advisor.
+     *
+     * @return infrastructure auto-proxy creator configured for class-based proxies.
+     */
     @Bean
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     @ConditionalOnProperty(prefix = "profiling", name = "mode", havingValue = "AOP", matchIfMissing = true)
@@ -35,6 +40,12 @@ public class ProfilingAutoConfiguration {
         return creator;
     }
 
+    /***
+     * Registers advisor that applies profiling to {@link org.profiling.Profiling}-annotated targets.
+     *
+     * @param properties starter properties used to configure advice behavior.
+     * @return profiling advisor bean.
+     */
     @Bean
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     @ConditionalOnProperty(prefix = "profiling", name = "mode", havingValue = "AOP", matchIfMissing = true)
@@ -43,7 +54,11 @@ public class ProfilingAutoConfiguration {
         return new ProfilingPointcutAdvisor(new ProfilingAopMethodInterceptor(properties.getLogType()));
     }
 
-    /**
+    /***
+     * Creates deprecated enhancer-based bean post processor for compatibility mode.
+     *
+     * @param properties starter properties used by legacy profiling implementation.
+     * @return legacy profiling bean post processor.
      * @deprecated Legacy mode fallback. Prefer {@link ProfilingMode#AOP}.
      */
     @Deprecated

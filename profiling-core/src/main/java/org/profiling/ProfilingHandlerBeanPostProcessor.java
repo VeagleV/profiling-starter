@@ -15,7 +15,7 @@ import java.lang.reflect.Modifier;
 
 
 
-/**
+/***
  * Legacy profiling implementation that creates manual CGLIB enhancers for beans
  * annotated with {@link Profiling}. Kept for backward compatibility and used only
  * when legacy mode is explicitly selected.
@@ -26,17 +26,39 @@ public class ProfilingHandlerBeanPostProcessor implements BeanPostProcessor {
     private final boolean enabled;
     private final LogType defaultLogType;
 
+    /***
+     * Creates legacy profiling post processor.
+     *
+     * @param enabled whether profiling is globally enabled.
+     * @param defaultLogType default log rendering style for profiling output.
+     */
     public ProfilingHandlerBeanPostProcessor(boolean enabled, LogType defaultLogType) {
 
         this.enabled = enabled;
         this.defaultLogType = defaultLogType;
     }
 
+    /***
+     * Returns bean unchanged before initialization.
+     *
+     * @param bean bean instance under initialization.
+     * @param beanName bean name in Spring context.
+     * @return same bean instance.
+     * @throws BeansException when bean processing fails.
+     */
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         return bean;
     }
 
+    /***
+     * Wraps eligible beans with legacy CGLIB proxy after initialization.
+     *
+     * @param bean initialized bean instance.
+     * @param beanName bean name in Spring context.
+     * @return proxied bean for profiling or original bean when not eligible.
+     * @throws BeansException when bean processing fails.
+     */
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (!enabled) {
