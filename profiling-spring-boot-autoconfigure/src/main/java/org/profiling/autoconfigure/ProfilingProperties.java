@@ -14,7 +14,7 @@ public class ProfilingProperties {
     private ProfilingMode mode = ProfilingMode.AOP;
 
     /***
-     * Indicates whether profiling auto-configuration is active.
+     * Indicates whether profiling autoconfiguration is active.
      *
      * @return {@code true} when profiling is enabled globally.
      */
@@ -23,7 +23,7 @@ public class ProfilingProperties {
     }
 
     /***
-     * Enables or disables profiling auto-configuration globally.
+     * Enables or disables profiling autoconfiguration globally.
      *
      * @param enabled global profiling switch.
      */

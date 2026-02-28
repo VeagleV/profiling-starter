@@ -7,7 +7,7 @@
     <parent>
         <groupId>io.github.veaglev</groupId>
         <artifactId>profiling-parent</artifactId>
-        <version>0.1.0</version>
+        <version>0.2.0</version>
     </parent>
 
     <artifactId>profiling-spring-boot-starter</artifactId>
