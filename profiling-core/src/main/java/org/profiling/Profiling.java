@@ -1,8 +1,5 @@
 package org.profiling;
 
-
-import org.profiling.enums.LogType;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -11,9 +8,33 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD,ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Profiling {
+    /***
+     * Message to be displayed in the logs
+     * @return String value of the message
+     */
     String  message() default "";
+
+    /***
+     * Determine whether Result of the method will show up in the logs or not
+     * @return boolean value
+     */
     boolean logResult() default true;
+
+    /***
+     * Determine whether Params(this includes parameters Types, as well as the values) of the method will show up in the logs or not
+     * @return boolean value
+     */
     boolean logParams() default true;
+
+    /***
+     * Determine whether Time completion of the method will show up in the logs or not
+     * @return boolean value
+     */
     boolean logTime() default true;
+
+    /***
+     * Determine whether Information about the caller of the method(class, function, row of the call) will show up in the logs or not
+     * @return boolean value
+     */
     boolean logCallerInfo() default true;
 }

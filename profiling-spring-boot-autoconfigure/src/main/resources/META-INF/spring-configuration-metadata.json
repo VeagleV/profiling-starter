@@ -1,0 +1,16 @@
+{
+  "properties": [
+    {
+      "name": "profiling.enabled",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "Enable or disable profiling globally."
+    },
+    {
+      "name": "profiling.log-type",
+      "type": "org.profiling.enums.LogType",
+      "defaultValue": "SIMPLE",
+      "description": "Default log output format."
+    }
+  ]
+}
