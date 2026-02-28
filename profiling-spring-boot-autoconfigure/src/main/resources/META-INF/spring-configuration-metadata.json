@@ -10,7 +10,13 @@
       "name": "profiling.log-type",
       "type": "org.profiling.enums.LogType",
       "defaultValue": "SIMPLE",
-      "description": "Log output format. SIMPLE - simple formatting. PRETTIER - formatted log output with concat, tabs, beautiful output"
+      "description": "Default log output format."
+    },
+    {
+      "name": "profiling.mode",
+      "type": "org.profiling.autoconfigure.ProfilingMode",
+      "defaultValue": "AOP",
+      "description": "Profiling wiring mode: AOP (default) or LEGACY enhancer fallback."
     }
   ]
 }
