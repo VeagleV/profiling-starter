@@ -83,7 +83,7 @@ Infrastructure/support beans are excluded from profiling advisor application.
 To force legacy mode:
 
 ```properties
-profiling.mode=legacy
+profiling.mode=LEGACY
 ```
 
 ## Troubleshooting
@@ -108,4 +108,3 @@ profiling.mode=legacy
 | Result: user-42
 | Time: 1.20 ms
 ```
-

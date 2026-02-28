@@ -37,7 +37,6 @@ public class ProfilingPointcutAdvisor extends StaticMethodMatcherPointcutAdvisor
         while (current != null && current != Object.class) {
             try {
                 Method declaredMethod = current.getDeclaredMethod(method.getName(), method.getParameterTypes());
-                declaredMethod.setAccessible(true);
                 return declaredMethod;
             } catch (NoSuchMethodException ignored) {
                 current = current.getSuperclass();

@@ -27,7 +27,7 @@ public class ProfilingAutoConfiguration {
 
     @Bean
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-    @ConditionalOnProperty(prefix = "profiling", name = "mode", havingValue = "aop", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "profiling", name = "mode", havingValue = "AOP", matchIfMissing = true)
     @ConditionalOnMissingBean(name = AopConfigUtils.AUTO_PROXY_CREATOR_BEAN_NAME)
     public static InfrastructureAdvisorAutoProxyCreator profilingAutoProxyCreator() {
         InfrastructureAdvisorAutoProxyCreator creator = new InfrastructureAdvisorAutoProxyCreator();
@@ -37,8 +37,8 @@ public class ProfilingAutoConfiguration {
 
     @Bean
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-    @ConditionalOnProperty(prefix = "profiling", name = "mode", havingValue = "aop", matchIfMissing = true)
-    @ConditionalOnMissingBean(Advisor.class)
+    @ConditionalOnProperty(prefix = "profiling", name = "mode", havingValue = "AOP", matchIfMissing = true)
+    @ConditionalOnMissingBean(ProfilingPointcutAdvisor.class)
     public Advisor profilingAdvisor(ProfilingProperties properties) {
         return new ProfilingPointcutAdvisor(new ProfilingAopMethodInterceptor(properties.getLogType()));
     }
@@ -49,7 +49,7 @@ public class ProfilingAutoConfiguration {
     @Deprecated
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = "profiling", name = "mode", havingValue = "legacy")
+    @ConditionalOnProperty(prefix = "profiling", name = "mode", havingValue = "LEGACY")
     public static ProfilingHandlerBeanPostProcessor profilingHandlerBeanPostProcessor(ProfilingProperties properties) {
         return new ProfilingHandlerBeanPostProcessor(
                 properties.isEnabled(),
