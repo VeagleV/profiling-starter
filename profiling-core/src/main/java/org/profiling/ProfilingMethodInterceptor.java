@@ -93,18 +93,18 @@ public class ProfilingMethodInterceptor implements MethodInterceptor {
             }
         }
     }
-    private  Object invokeMethod(Method method, Object target, Object[] args) {
+    private  Object invokeMethod(Method method, Object target, Object[] args) throws Throwable {
         try{
-            Object result = method.invoke(target, args);
-            return result;
+            return method.invoke(target, args);
         } catch (InvocationTargetException e){
             Throwable exp = e.getTargetException();
             logger.warn("Invocation of method {} failed", method.getName(), exp);
+            throw exp;
 
         } catch (Throwable t){
             logger.warn("Error while invoking profiling method", t);
+            throw t;
         }
-        return null;
     }
     private void logProfilingInfo(Method originalMethod, Object[] args, Object result, long executionTime, Throwable exception, Profiling annotation) {
         try {
@@ -113,23 +113,17 @@ public class ProfilingMethodInterceptor implements MethodInterceptor {
             String execTime = formatTime(executionTime);
             String message = annotation.message();
 
-//        boolean logResult() default true; +
-//        boolean logParams() default true; +
-//        boolean logTime() default true; +
-//        boolean logCallerInfo() default true; +
-//        LogType type() default LogType.SIMPLE;
-
             StringBuilder sb = new StringBuilder("\n");
 
             if (defaultLogType == LogType.SIMPLE){
                 sb.append("\n+------------------+");
                 sb.append("\n| Profiling info:  |");
                 sb.append("\n+------------------+");
-                sb.append("\n| " + message);
-                sb.append("\n| Method: " + methodName);
+                sb.append("\n| ").append(message);
+                sb.append("\n| Method: ").append(methodName);
 
                 if (annotation.logCallerInfo()) {
-                    sb.append("\n| CallerInfo: " + callerInfo);
+                    sb.append("\n| CallerInfo: ").append(callerInfo);
                 }
 
                 if (annotation.logParams()) {
@@ -170,22 +164,23 @@ public class ProfilingMethodInterceptor implements MethodInterceptor {
                     maxWidth = Math.max(maxWidth, resultStr.length() + 15);
                 }
 
-                // Ограничиваем максимальную ширину
+                // Constraining max width
                 maxWidth = Math.min(maxWidth, 120);
-                // + - + + + | + +
+
+                // Upper bound
                 sb.append("+").append(repeatChar('-', maxWidth)).append("+\n");
 
-                // Заголовок
+                // Header
                 sb.append("|").append(centerText(" PROFILING INFO ", maxWidth)).append("|\n");
                 sb.append("+").append(repeatChar('-', maxWidth)).append("+\n");
 
-                // Метод
+                // Method
                 appendFormattedLine(sb, "Method", methodName, maxWidth);
 
-                // Откуда вызван
+                // Where Called from
                 appendFormattedLine(sb, "Called from", callerInfo, maxWidth);
 
-                // Параметры
+                // Params
                 if (annotation.logParams() && args != null && args.length > 0) {
                     sb.append("+").append(repeatChar('-', maxWidth)).append("+\n");
                     sb.append("|").append(boldText(" Parameters:", maxWidth)).append("|\n");
@@ -200,7 +195,7 @@ public class ProfilingMethodInterceptor implements MethodInterceptor {
                         String paramType = paramTypes[i].getSimpleName();
                         String paramValue = prettyToString(args[i]);
 
-                        // Форматируем параметр с отступом
+                        // Formatting with spaces
                         String paramLine = String.format("  [%d] %s %s = %s",
                                 i, paramType, paramName, paramValue);
 
@@ -208,14 +203,14 @@ public class ProfilingMethodInterceptor implements MethodInterceptor {
                     }
                 }
 
-                // Время выполнения
+                // Execution time
                 if (annotation.logTime()) {
                     sb.append("+").append(repeatChar('-', maxWidth)).append("+\n");
                     appendFormattedLine(sb, "Execution Time",
                             execTime, maxWidth);
                 }
 
-                // Результат или исключение
+                // Result OR Exception
                 sb.append("+").append(repeatChar('-', maxWidth)).append("+\n");
 
                 if (exception != null) {
@@ -236,7 +231,7 @@ public class ProfilingMethodInterceptor implements MethodInterceptor {
                     }
                 }
 
-                // Нижняя граница
+                // Lower bound
                 sb.append("+").append(repeatChar('-', maxWidth)).append("+");
 
                 logger.info(sb.toString());
@@ -272,7 +267,7 @@ public class ProfilingMethodInterceptor implements MethodInterceptor {
         }
 
         try {
-            //коллекции
+            //Collections
             if (object instanceof java.util.Collection<?> coll) {
                 if (coll.isEmpty()) {
                     return "[] (empty)";
@@ -290,7 +285,7 @@ public class ProfilingMethodInterceptor implements MethodInterceptor {
                         truncate(object.toString(), 150));
             }
 
-            // массивы
+            // Arrays
             if (object.getClass().isArray()) {
                 int length = java.lang.reflect.Array.getLength(object);
                 if (length == 0) {
@@ -333,7 +328,7 @@ public class ProfilingMethodInterceptor implements MethodInterceptor {
 
         sb.append("|").append(labelPart).append(value);
 
-        // Дополняем пробелами до нужной ширины
+
         int padding = maxWidth - labelPart.length() - value.length();
         sb.append(repeatChar(' ', padding)).append("|\n");
     }
@@ -357,27 +352,27 @@ public class ProfilingMethodInterceptor implements MethodInterceptor {
             return;
         }
 
-        // Разбиваем на строки
+
         String[] words = text.split(" ");
         StringBuilder line = new StringBuilder();
 
         for (String word : words) {
             if (line.length() + word.length() + 1 <= contentWidth) {
-                if (line.length() > 0) line.append(" ");
+                if (!line.isEmpty()) line.append(" ");
                 line.append(word);
             } else {
-                // Выводим текущую строку
+
                 sb.append(prefix).append(line);
                 int padding = maxWidth - prefix.length() - line.length();
                 sb.append(repeatChar(' ', padding)).append(" |\n");
 
-                // Начинаем новую строку
+
                 line = new StringBuilder(word);
             }
         }
 
-        // Выводим последнюю строку
-        if (line.length() > 0) {
+
+        if (!line.isEmpty()) {
             sb.append(prefix).append(line);
             int padding = maxWidth - prefix.length() - line.length();
             sb.append(repeatChar(' ', padding)).append(" |\n");
@@ -419,11 +414,7 @@ public class ProfilingMethodInterceptor implements MethodInterceptor {
      * @return string containing repeated characters.
      */
     private String repeatChar(char c, int count) {
-        StringBuilder sb = new StringBuilder(count);
-        for (int i = 0; i < count; i++) {
-            sb.append(c);
-        }
-        return sb.toString();
+        return String.valueOf(c).repeat(Math.max(0, count));
     }
 
 

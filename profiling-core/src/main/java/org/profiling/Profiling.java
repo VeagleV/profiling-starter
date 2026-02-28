@@ -5,6 +5,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+
+/***
+ * Annotation for profiling(logging time, args, result, stacktrace) methods.
+ * Can be placed on class to profile all of its methods.
+ * Can be placed on methods to overwrite properties of profiling if needed.
+ */
 @Target({ElementType.METHOD,ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Profiling {
