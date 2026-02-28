@@ -10,6 +10,10 @@ import org.springframework.cglib.proxy.MethodProxy;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+/**
+ * Core profiling interceptor logic used by both legacy enhancer proxies and
+ * infrastructure-driven Spring AOP adapter.
+ */
 public class ProfilingMethodInterceptor implements MethodInterceptor {
     private final Class<?> targetClass;
     private final Object target;

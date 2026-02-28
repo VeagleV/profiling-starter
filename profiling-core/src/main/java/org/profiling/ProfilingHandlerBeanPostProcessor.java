@@ -15,6 +15,11 @@ import java.lang.reflect.Modifier;
 
 
 
+/**
+ * Legacy profiling implementation that creates manual CGLIB enhancers for beans
+ * annotated with {@link Profiling}. Kept for backward compatibility and used only
+ * when legacy mode is explicitly selected.
+ */
 public class ProfilingHandlerBeanPostProcessor implements BeanPostProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(ProfilingHandlerBeanPostProcessor.class);

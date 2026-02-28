@@ -11,6 +11,12 @@
       "type": "org.profiling.enums.LogType",
       "defaultValue": "SIMPLE",
       "description": "Default log output format."
+    },
+    {
+      "name": "profiling.mode",
+      "type": "org.profiling.autoconfigure.ProfilingMode",
+      "defaultValue": "AOP",
+      "description": "Profiling wiring mode: AOP (default) or LEGACY enhancer fallback."
     }
   ]
 }
